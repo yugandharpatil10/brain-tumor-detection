@@ -1,0 +1,341 @@
+Dataset Loading and Preprocessing:
+
+
+The script loads MRI images from datasets/no/ (no tumor) and datasets/yes/ (tumor) folders.
+It filters for .jpg files, reads them using OpenCV, converts them to RGB, and resizes them to 64x64 pixels.
+mages are stored in a NumPy array with shape (n_samples, 64, 64, 3), and labels (0 for no tumor, 1 for tumor) are stored as (n_samples,).
+The data is split into 80% training and 20% testing sets, then normalized along the height axis to stabilize training.
+
+Data preprocessing complete!
+/Users/yupatil/Desktop/Projects/my-Projects/brain-tumor-detection/venv/lib/python3.9/site-packages/keras/src/layers/convolutional/base_conv.py:107: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+/Users/yupatil/Desktop/Projects/my-Projects/brain-tumor-detection/train.py:140: UserWarning: `input_shape` is undefined or non-square, or `rows` is not in [96, 128, 160, 192, 224]. Weights for input shape (224, 224) will be loaded as the default.
+  base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(INPUT_SIZE, INPUT_SIZE, 3))
+
+ Model Summary of BaselineCNN...
+Model: "sequential"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)                         ┃ Output Shape                ┃         Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ conv2d (Conv2D)                      │ (None, 62, 62, 32)          │             896 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation (Activation)              │ (None, 62, 62, 32)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ max_pooling2d (MaxPooling2D)         │ (None, 31, 31, 32)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ conv2d_1 (Conv2D)                    │ (None, 29, 29, 32)          │           9,248 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_1 (Activation)            │ (None, 29, 29, 32)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ max_pooling2d_1 (MaxPooling2D)       │ (None, 14, 14, 32)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ conv2d_2 (Conv2D)                    │ (None, 12, 12, 64)          │          18,496 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_2 (Activation)            │ (None, 12, 12, 64)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ max_pooling2d_2 (MaxPooling2D)       │ (None, 6, 6, 64)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ flatten (Flatten)                    │ (None, 2304)                │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dense (Dense)                        │ (None, 64)                  │         147,520 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_3 (Activation)            │ (None, 64)                  │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dropout (Dropout)                    │ (None, 64)                  │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dense_1 (Dense)                      │ (None, 1)                   │              65 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_4 (Activation)            │ (None, 1)                   │               0 │
+└──────────────────────────────────────┴─────────────────────────────┴─────────────────┘
+ Total params: 176,225 (688.38 KB)
+ Trainable params: 176,225 (688.38 KB)
+ Non-trainable params: 0 (0.00 B)
+
+
+ Model Summary of CNNBNFocal...
+Model: "sequential_1"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)                         ┃ Output Shape                ┃         Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ conv2d_3 (Conv2D)                    │ (None, 62, 62, 32)          │             896 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ batch_normalization                  │ (None, 62, 62, 32)          │             128 │
+│ (BatchNormalization)                 │                             │                 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_5 (Activation)            │ (None, 62, 62, 32)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ max_pooling2d_3 (MaxPooling2D)       │ (None, 31, 31, 32)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ conv2d_4 (Conv2D)                    │ (None, 29, 29, 32)          │           9,248 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ batch_normalization_1                │ (None, 29, 29, 32)          │             128 │
+│ (BatchNormalization)                 │                             │                 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_6 (Activation)            │ (None, 29, 29, 32)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ max_pooling2d_4 (MaxPooling2D)       │ (None, 14, 14, 32)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ conv2d_5 (Conv2D)                    │ (None, 12, 12, 64)          │          18,496 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ batch_normalization_2                │ (None, 12, 12, 64)          │             256 │
+│ (BatchNormalization)                 │                             │                 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_7 (Activation)            │ (None, 12, 12, 64)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ max_pooling2d_5 (MaxPooling2D)       │ (None, 6, 6, 64)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ flatten_1 (Flatten)                  │ (None, 2304)                │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dense_2 (Dense)                      │ (None, 64)                  │         147,520 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_8 (Activation)            │ (None, 64)                  │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dropout_1 (Dropout)                  │ (None, 64)                  │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dense_3 (Dense)                      │ (None, 1)                   │              65 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_9 (Activation)            │ (None, 1)                   │               0 │
+└──────────────────────────────────────┴─────────────────────────────┴─────────────────┘
+ Total params: 176,737 (690.38 KB)
+ Trainable params: 176,481 (689.38 KB)
+ Non-trainable params: 256 (1.00 KB)
+
+
+ Model Summary of MobileNetV2...
+Model: "functional_33"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)                         ┃ Output Shape                ┃         Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ input_layer_3 (InputLayer)           │ (None, 64, 64, 3)           │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ mobilenetv2_1.00_224 (Functional)    │ (None, 2, 2, 1280)          │       2,257,984 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ global_average_pooling2d             │ (None, 1280)                │               0 │
+│ (GlobalAveragePooling2D)             │                             │                 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dense_4 (Dense)                      │ (None, 64)                  │          81,984 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dropout_2 (Dropout)                  │ (None, 64)                  │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dense_5 (Dense)                      │ (None, 1)                   │              65 │
+└──────────────────────────────────────┴─────────────────────────────┴─────────────────┘
+ Total params: 2,340,033 (8.93 MB)
+ Trainable params: 82,049 (320.50 KB)
+ Non-trainable params: 2,257,984 (8.61 MB)
+
+
+ Model Summary of DeepCNNDice...
+Model: "sequential_2"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)                         ┃ Output Shape                ┃         Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ conv2d_6 (Conv2D)                    │ (None, 62, 62, 32)          │             896 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_10 (Activation)           │ (None, 62, 62, 32)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ max_pooling2d_6 (MaxPooling2D)       │ (None, 31, 31, 32)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ conv2d_7 (Conv2D)                    │ (None, 29, 29, 64)          │          18,496 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_11 (Activation)           │ (None, 29, 29, 64)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ max_pooling2d_7 (MaxPooling2D)       │ (None, 14, 14, 64)          │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ conv2d_8 (Conv2D)                    │ (None, 12, 12, 128)         │          73,856 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_12 (Activation)           │ (None, 12, 12, 128)         │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ max_pooling2d_8 (MaxPooling2D)       │ (None, 6, 6, 128)           │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ conv2d_9 (Conv2D)                    │ (None, 4, 4, 256)           │         295,168 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_13 (Activation)           │ (None, 4, 4, 256)           │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ flatten_2 (Flatten)                  │ (None, 4096)                │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dense_6 (Dense)                      │ (None, 128)                 │         524,416 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_14 (Activation)           │ (None, 128)                 │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dropout_3 (Dropout)                  │ (None, 128)                 │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ dense_7 (Dense)                      │ (None, 1)                   │             129 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ activation_15 (Activation)           │ (None, 1)                   │               0 │
+└──────────────────────────────────────┴─────────────────────────────┴─────────────────┘
+ Total params: 912,961 (3.48 MB)
+ Trainable params: 912,961 (3.48 MB)
+ Non-trainable params: 0 (0.00 B)
+
+Training started! 
+
+
+
+Training BaselineCNN...
+Epoch 1/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 8s 44ms/step - accuracy: 0.6519 - loss: 0.6034 - val_accuracy: 0.8100 - val_loss: 0.4365
+Epoch 2/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 6s 42ms/step - accuracy: 0.8251 - loss: 0.3921 - val_accuracy: 0.8617 - val_loss: 0.3227
+Epoch 3/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 6s 40ms/step - accuracy: 0.8998 - loss: 0.2667 - val_accuracy: 0.8917 - val_loss: 0.2548
+Epoch 4/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 6s 41ms/step - accuracy: 0.9321 - loss: 0.1772 - val_accuracy: 0.9450 - val_loss: 0.1646
+Epoch 5/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 6s 41ms/step - accuracy: 0.9602 - loss: 0.1163 - val_accuracy: 0.9500 - val_loss: 0.1402
+Epoch 6/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 6s 41ms/step - accuracy: 0.9768 - loss: 0.0849 - val_accuracy: 0.9583 - val_loss: 0.1136
+Epoch 7/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 6s 40ms/step - accuracy: 0.9912 - loss: 0.0399 - val_accuracy: 0.9633 - val_loss: 0.0844
+Epoch 8/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 6s 41ms/step - accuracy: 0.9893 - loss: 0.0378 - val_accuracy: 0.9633 - val_loss: 0.1001
+Epoch 9/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 6s 41ms/step - accuracy: 0.9946 - loss: 0.0252 - val_accuracy: 0.9667 - val_loss: 0.0901
+Epoch 10/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 6s 41ms/step - accuracy: 0.9916 - loss: 0.0311 - val_accuracy: 0.9733 - val_loss: 0.0781
+WARNING:absl:You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+Model saved as models/BaselineCNN10Epochs.h5
+
+Training CNNBNFocal...
+Epoch 1/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 12s 69ms/step - accuracy: 0.7019 - loss: 0.0505 - val_accuracy: 0.4283 - val_loss: 0.0882
+Epoch 2/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 10s 69ms/step - accuracy: 0.8296 - loss: 0.0142 - val_accuracy: 0.4283 - val_loss: 0.1693
+Epoch 3/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 11s 70ms/step - accuracy: 0.8923 - loss: 0.0080 - val_accuracy: 0.4367 - val_loss: 0.0935
+Epoch 4/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 10s 70ms/step - accuracy: 0.9100 - loss: 0.0058 - val_accuracy: 0.8450 - val_loss: 0.0105
+Epoch 5/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 10s 69ms/step - accuracy: 0.9434 - loss: 0.0028 - val_accuracy: 0.9000 - val_loss: 0.0055
+Epoch 6/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 10s 70ms/step - accuracy: 0.9529 - loss: 0.0022 - val_accuracy: 0.9133 - val_loss: 0.0041
+Epoch 7/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 11s 73ms/step - accuracy: 0.9604 - loss: 0.0018 - val_accuracy: 0.9433 - val_loss: 0.0019
+Epoch 8/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 11s 70ms/step - accuracy: 0.9712 - loss: 9.3060e-04 - val_accuracy: 0.9700 - val_loss: 8.7831e-04
+Epoch 9/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 10s 67ms/step - accuracy: 0.9820 - loss: 5.9952e-04 - val_accuracy: 0.9717 - val_loss: 6.0075e-04
+Epoch 10/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 10s 68ms/step - accuracy: 0.9886 - loss: 3.1400e-04 - val_accuracy: 0.9617 - val_loss: 0.0011
+WARNING:absl:You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+Model saved as models/CNNBNFocal10Epochs.h5
+
+Training MobileNetV2...
+Epoch 1/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 12s 56ms/step - accuracy: 0.7377 - loss: 0.5198 - val_accuracy: 0.8567 - val_loss: 0.3384
+Epoch 2/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 8s 50ms/step - accuracy: 0.8876 - loss: 0.2925 - val_accuracy: 0.8767 - val_loss: 0.2863
+Epoch 3/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 7s 47ms/step - accuracy: 0.9023 - loss: 0.2545 - val_accuracy: 0.8867 - val_loss: 0.2510
+Epoch 4/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 8s 51ms/step - accuracy: 0.9028 - loss: 0.2329 - val_accuracy: 0.9250 - val_loss: 0.2066
+Epoch 5/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 8s 54ms/step - accuracy: 0.9225 - loss: 0.1947 - val_accuracy: 0.9167 - val_loss: 0.2238
+Epoch 6/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 7s 47ms/step - accuracy: 0.9364 - loss: 0.1628 - val_accuracy: 0.9300 - val_loss: 0.1867
+Epoch 7/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 6s 43ms/step - accuracy: 0.9453 - loss: 0.1581 - val_accuracy: 0.9167 - val_loss: 0.2076
+Epoch 8/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 7s 49ms/step - accuracy: 0.9484 - loss: 0.1487 - val_accuracy: 0.9483 - val_loss: 0.1671
+Epoch 9/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 7s 47ms/step - accuracy: 0.9479 - loss: 0.1256 - val_accuracy: 0.9150 - val_loss: 0.1977
+Epoch 10/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 7s 49ms/step - accuracy: 0.9537 - loss: 0.1261 - val_accuracy: 0.9250 - val_loss: 0.1981
+WARNING:absl:You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+Model saved as models/MobileNetV210Epochs.h5
+
+Training DeepCNNDice...
+Epoch 1/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 10s 61ms/step - accuracy: 0.5212 - loss: 0.3362 - val_accuracy: 0.4283 - val_loss: 0.4103
+Epoch 2/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 9s 60ms/step - accuracy: 0.5166 - loss: 0.3272 - val_accuracy: 0.4283 - val_loss: 0.4103
+Epoch 3/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 9s 59ms/step - accuracy: 0.5166 - loss: 0.3272 - val_accuracy: 0.4283 - val_loss: 0.4103
+Epoch 4/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 9s 60ms/step - accuracy: 0.5166 - loss: 0.3272 - val_accuracy: 0.4283 - val_loss: 0.4103
+Epoch 5/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 9s 61ms/step - accuracy: 0.5166 - loss: 0.3272 - val_accuracy: 0.4283 - val_loss: 0.4103
+Epoch 6/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 8s 55ms/step - accuracy: 0.5166 - loss: 0.3272 - val_accuracy: 0.4283 - val_loss: 0.4103
+Epoch 7/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 8s 53ms/step - accuracy: 0.5166 - loss: 0.3272 - val_accuracy: 0.4283 - val_loss: 0.4103
+Epoch 8/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 8s 55ms/step - accuracy: 0.5166 - loss: 0.3272 - val_accuracy: 0.4283 - val_loss: 0.4103
+Epoch 9/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 8s 55ms/step - accuracy: 0.5166 - loss: 0.3272 - val_accuracy: 0.4283 - val_loss: 0.4103
+Epoch 10/10
+150/150 ━━━━━━━━━━━━━━━━━━━━ 9s 60ms/step - accuracy: 0.5166 - loss: 0.3272 - val_accuracy: 0.4283 - val_loss: 0.4103
+WARNING:absl:You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+Model saved as models/DeepCNNDice10Epochs.h5
+
+
+ Plotting Results: 
+
+
+
+=== Training Results ===
+
+Model: BaselineCNN
+Epoch | Train Loss | Val Loss | Train Acc | Val Acc
+--------------------------------------------------
+    1 | 0.5382     | 0.4365   | 0.7350    | 0.8100
+    2 | 0.3718     | 0.3227   | 0.8354    | 0.8617
+    3 | 0.2463     | 0.2548   | 0.9038    | 0.8917
+    4 | 0.1711     | 0.1646   | 0.9367    | 0.9450
+    5 | 0.1079     | 0.1402   | 0.9646    | 0.9500
+    6 | 0.0733     | 0.1136   | 0.9796    | 0.9583
+    7 | 0.0398     | 0.0844   | 0.9900    | 0.9633
+    8 | 0.0379     | 0.1001   | 0.9887    | 0.9633
+    9 | 0.0276     | 0.0901   | 0.9933    | 0.9667
+   10 | 0.0204     | 0.0781   | 0.9946    | 0.9733
+Final Val Loss: 0.0781, Final Val Acc: 0.9733
+
+Model: CNNBNFocal
+Epoch | Train Loss | Val Loss | Train Acc | Val Acc
+--------------------------------------------------
+    1 | 0.0305     | 0.0882   | 0.7513    | 0.4283
+    2 | 0.0132     | 0.1693   | 0.8358    | 0.4283
+    3 | 0.0088     | 0.0935   | 0.8858    | 0.4367
+    4 | 0.0057     | 0.0105   | 0.9121    | 0.8450
+    5 | 0.0025     | 0.0055   | 0.9508    | 0.9000
+    6 | 0.0022     | 0.0041   | 0.9546    | 0.9133
+    7 | 0.0016     | 0.0019   | 0.9583    | 0.9433
+    8 | 0.0009     | 0.0009   | 0.9742    | 0.9700
+    9 | 0.0007     | 0.0006   | 0.9796    | 0.9717
+   10 | 0.0003     | 0.0011   | 0.9862    | 0.9617
+Final Val Loss: 0.0011, Final Val Acc: 0.9617
+
+Model: MobileNetV2
+Epoch | Train Loss | Val Loss | Train Acc | Val Acc
+--------------------------------------------------
+    1 | 0.4295     | 0.3384   | 0.8008    | 0.8567
+    2 | 0.3025     | 0.2863   | 0.8771    | 0.8767
+    3 | 0.2517     | 0.2510   | 0.8996    | 0.8867
+    4 | 0.2151     | 0.2066   | 0.9129    | 0.9250
+    5 | 0.2007     | 0.2238   | 0.9192    | 0.9167
+    6 | 0.1721     | 0.1867   | 0.9308    | 0.9300
+    7 | 0.1767     | 0.2076   | 0.9337    | 0.9167
+    8 | 0.1466     | 0.1671   | 0.9450    | 0.9483
+    9 | 0.1364     | 0.1977   | 0.9446    | 0.9150
+   10 | 0.1365     | 0.1981   | 0.9496    | 0.9250
+Final Val Loss: 0.1981, Final Val Acc: 0.9250
+
+Model: DeepCNNDice
+Epoch | Train Loss | Val Loss | Train Acc | Val Acc
+--------------------------------------------------
+    1 | 0.3280     | 0.4103   | 0.5188    | 0.4283
+    2 | 0.3262     | 0.4103   | 0.5179    | 0.4283
+    3 | 0.3262     | 0.4103   | 0.5179    | 0.4283
+    4 | 0.3262     | 0.4103   | 0.5179    | 0.4283
+    5 | 0.3262     | 0.4103   | 0.5179    | 0.4283
+    6 | 0.3262     | 0.4103   | 0.5179    | 0.4283
+    7 | 0.3262     | 0.4103   | 0.5179    | 0.4283
+    8 | 0.3262     | 0.4103   | 0.5179    | 0.4283
+    9 | 0.3262     | 0.4103   | 0.5179    | 0.4283
+   10 | 0.3262     | 0.4103   | 0.5179    | 0.4283
+Final Val Loss: 0.4103, Final Val Acc: 0.4283
+
+=======================
+Saved plot: plots/BaselineCNN_results.png
+Saved plot: plots/CNNBNFocal_results.png
+Saved plot: plots/MobileNetV2_results.png
+Saved plot: plots/DeepCNNDice_results.png
